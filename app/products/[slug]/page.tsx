@@ -28,11 +28,11 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   return {
     title: `${product.metadata.name} - ElectroLux`,
-    description: product.metadata.short_description,
-    keywords: product.metadata.seo_keywords || 'lighting, LED, electrical fixtures',
+    description: product.metadata.short_description || product.metadata.description?.replace(/<[^>]*>/g, '').substring(0, 160),
+    keywords: product.metadata.seo_keywords || `${product.metadata.name}, lighting, LED, electrical fixtures`,
     openGraph: {
       title: product.metadata.name,
-      description: product.metadata.short_description,
+      description: product.metadata.short_description || 'Premium lighting solution from ElectroLux',
       images: [
         {
           url: `${product.metadata.main_image.imgix_url}?w=1200&h=630&fit=crop&auto=format,compress`,
@@ -41,12 +41,6 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
           alt: product.metadata.name,
         },
       ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.metadata.name,
-      description: product.metadata.short_description,
-      images: [`${product.metadata.main_image.imgix_url}?w=1200&h=630&fit=crop&auto=format,compress`],
     },
   }
 }
@@ -59,19 +53,5 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
-  // Get related products from same category
-  const allProducts = await getProducts()
-  const relatedProducts = allProducts
-    .filter(p => 
-      p.id !== product.id && 
-      p.metadata.category?.slug === product.metadata.category?.slug
-    )
-    .slice(0, 4)
-
-  return (
-    <ProductDetailPage 
-      product={product} 
-      relatedProducts={relatedProducts}
-    />
-  )
+  return <ProductDetailPage product={product} />
 }
